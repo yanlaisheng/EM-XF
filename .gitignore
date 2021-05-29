@@ -1,0 +1,7 @@
+#/EWARM/robotcontrol/*.*
+/EWARM/robotcontrol/
+/.vscode/
+.git/
+.svn/
+.[oa]
+

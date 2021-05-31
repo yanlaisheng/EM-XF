@@ -24,15 +24,16 @@ extern "C"
 #endif
 
 #define ECM_PACK_BEGIN
-#define ECM_PACK __attribute__((__packed__))
+#define ECM_PACK __attribute__((__packed__)) //不对齐，而是压缩存放
 #define ECM_PACK_END
 
 #define CIA402_SW_STATE_MASK 0x6F
+//402状态
 #define CIA402_SW_NOTREADYTOSWITCHON 0x00
 #define CIA402_SW_SWITCHEDONDISABLED 0x40
-#define CIA402_SW_READYTOSWITCHON 0x21
+#define CIA402_SW_READYTOSWITCHON 0x21 //servo off
 #define CIA402_SW_SWITCHEDON 0x23
-#define CIA402_SW_OPERATIONENABLED 0x27
+#define CIA402_SW_OPERATIONENABLED 0x27 //servo on
 #define CIA402_SW_QUICKSTOPACTIVE 0x07
 #define CIA402_SW_FAULTREACTIONACTIVE 0x0F
 #define CIA402_SW_FAULT 0x08
@@ -115,9 +116,9 @@ extern "C"
 #define ECM_STATE_OP_WR 2
 #define ECM_STATE_OP_WRandACK 3
 
-#define CIA402_FSM_CTL_FAULT_RST_MASK 0x08	   //bit3
-#define CIA402_FSM_CTL_ENABLE_MASK 0x10		   //bit4
-#define CIA402_FSM_CTL_FAULT_AUTORST_MASK 0x80 //bit7
+#define CIA402_FSM_CTL_FAULT_RST_MASK 0x08	   //bit3 從站狀態機錯誤清除
+#define CIA402_FSM_CTL_ENABLE_MASK 0x10		   //bit4 狀態機控制啟動
+#define CIA402_FSM_CTL_FAULT_AUTORST_MASK 0x80 //bit7 從站狀態機錯誤自動清除啟動
 
 #define ECM_EEPROM_OP_RD 0
 #define ECM_EEPROM_OP_WR 1
@@ -211,16 +212,17 @@ extern "C"
 	} EC_DCSYNC_H;
 	ECM_PACK_END
 	ECM_PACK_BEGIN
+	//請求執行SDO讀寫命令的数据结构
 	typedef struct ECM_PACK sdo_write_t
 	{
-		uint8_t OP;
-		uint8_t Slave;
-		uint16_t Index;
-		uint8_t SubIndex;
-		uint8_t CA;
-		uint16_t size;
-		int Timeout;
-		uint8_t Data[256];
+		uint8_t OP;		   //操作码
+		uint8_t Slave;	   //从站站号
+		uint16_t Index;	   //索引号
+		uint8_t SubIndex;  //子索引号
+		uint8_t CA;		   //保留
+		uint16_t size;	   //数据长度
+		int Timeout;	   //超时时间
+		uint8_t Data[256]; //数据
 	} SDO_CMD_HEAD;
 	ECM_PACK_END
 	ECM_PACK_BEGIN
@@ -232,14 +234,28 @@ extern "C"
 	} OBJ_ENTRY_T;
 	ECM_PACK_END
 	ECM_PACK_BEGIN
+	//从站PDO配置数据结构
+	/*
+	 * Use API 'ECM_EcatPdoConfigSet' to set PDOs.
+	 * Structure of type PDO_CONFIG_HEAD:
+	 *      Slave: slave address
+	 *      SmaIdx: Sync Manager index. It should be RxPDO Assign(0x1c12) or TxPDO Assign(0x1c13).
+	 *      PDOCnt: Number of PDO mappings. No more than 3 for this API.
+	 *      MapIdx[n]: The n-th PDO mapping index.
+	 *      ObjsCnt[n]: Number of PDO entries for n-th PDO mapping. No more than 8 for this API.
+	 *      Table[m][n]: The n-th PDO entrie of m-th PDO mapping.
+	 * This API does not work if the number of PDO mappings is more the 3,
+	 * or the number of PDO entries of any PDO mapping is more than 8.
+	 * For those cases, use SDO request to set PDO configures.
+	 */
 	typedef struct ECM_PACK pdo_config_t
 	{
-		uint8_t Slave;
-		uint8_t PDOCnt;
-		uint16_t SmaIdx;
-		uint16_t MapIdx[3];
-		uint16_t ObjsCnt[3];
-		OBJ_ENTRY_T Table[3][8];
+		uint8_t Slave;			 //从站站号0-127
+		uint8_t PDOCnt;			 //PDO数量0-127
+		uint16_t SmaIdx;		 //PDO指定索引号，TxPDO或RxPDO
+		uint16_t MapIdx[3];		 //PDO映射索引号0-2，最多3个
+		uint16_t ObjsCnt[3];	 //PDO对象数量0-2，最多3个
+		OBJ_ENTRY_T Table[3][8]; //PDO对象[0-2][0-7]
 	} PDO_CONFIG_HEAD;
 	ECM_PACK_END
 	ECM_PACK_BEGIN

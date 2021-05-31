@@ -17,25 +17,25 @@
 #ifndef _ECM_USR_PDO_DEFINE_H_
 #define _ECM_USR_PDO_DEFINE_H_
 
-#define RxPDO_ASSIGN_IDX		0x1C12
-#define TxPDO_ASSIGN_IDX		0x1C13
+#define RxPDO_ASSIGN_IDX 0x1C12
+#define TxPDO_ASSIGN_IDX 0x1C13
 
-#define RxPDO_MAP_IDX			0x1600
-#define TxPDO_MAP_IDX			0x1A00
+#define RxPDO_MAP_IDX 0x1600
+#define TxPDO_MAP_IDX 0x1A00
 
-#define RXPDO_SIZE_BYTES		6
-#define TXPDO_SIZE_BYTES		6
+#define RXPDO_SIZE_BYTES 6
+#define TXPDO_SIZE_BYTES 6
 
-typedef struct __attribute__((__packed__)) _rxpdo_st_def_t
+typedef struct __attribute__((__packed__)) _rxpdo_st_def_t //PACK£¬Ñ¹Ëõ´æ´¢£¬·Ç¶ÔÆë´æ´¢
 {
 	uint16_t u16CtlWord;
 	int32_t n32TarPos;
-}RXPDO_ST_DEF_T;
+} RXPDO_ST_DEF_T;
 
 typedef struct __attribute__((__packed__)) _txpdo_st_def_t
 {
 	uint16_t u16StaWord;
 	int32_t n32AcuPos;
-}TXPDO_ST_DEF_T;
+} TXPDO_ST_DEF_T;
 
 #endif
